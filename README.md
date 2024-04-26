@@ -79,6 +79,7 @@ mvn test
 * Used [Controller Advisor](/src/main/java/com/midlaj/olikassigment/controller/ControllerAdvisor.java) for managing exceptions and return error details as response for every custom exceptions.
 * For every other unhandled exception created a [Global Controller Advisor](/src/main/java/com/midlaj/olikassigment/controller/GeneralControllerAdvisor.java).
 * Multiple profiles for managing environments.
+* Created a Database [Seeder](/src/main/java/com/midlaj/olikassigment/db/DatabaseSeeder.java) for creating some data when starting the application.
 
 
 ## Author

@@ -7,6 +7,7 @@ import com.midlaj.olikassigment.model.Rental;
 import com.midlaj.olikassigment.repository.AuthorRepository;
 import com.midlaj.olikassigment.repository.BookRepository;
 import com.midlaj.olikassigment.repository.RentalRepository;
+import com.midlaj.olikassigment.util.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,25 +83,36 @@ public class RentalControllerTest {
         /**
          *  Create book test data
          */
-        Book book = Book.builder()
+        Book book1 = Book.builder()
                 .title("Test_Book_Title_1" + UUID.randomUUID())
                 .author(savedAuthor)
-                .isbn(generateRandomIsbn13())
+                .isbn(Utils.generateRandomIsbn13())
                 .publicationYear(LocalDate.now().getYear())
                 .available(true)
                 .build();
 
-        Book savedBook = bookRepository.save(book);
+        Book book2 = Book.builder()
+                .title("Test_Book_Title_2" + UUID.randomUUID())
+                .author(savedAuthor)
+                .isbn(Utils.generateRandomIsbn13())
+                .publicationYear(LocalDate.now().getYear())
+                .available(false)
+                .build();
+
+        Book savedBook1 = bookRepository.save(book1);
+        Book savedBook2 = bookRepository.save(book2);
 
         /**
          * Check if saved book is not null;
          */
-        assertNotNull(savedBook);
+        assertNotNull(book1);
+        assertNotNull(book2);
+
 
         /**
          * set book id for testing
          */
-        bookId = savedBook.getId();
+        bookId = savedBook1.getId();
 
 
         /**
@@ -110,7 +121,7 @@ public class RentalControllerTest {
         Rental rental = Rental.builder()
                 .renterName("Test_Renter_Name_" + UUID.randomUUID())
                 .rentalDate(LocalDate.now())
-                .bookId(bookId)
+                .bookId(savedBook2.getId())
                 .returnDate(null)
                 .build();
 
@@ -141,8 +152,9 @@ public class RentalControllerTest {
         /**
          * performing a POST request
          */
-        ResponseEntity<?> response = restTemplate.postForEntity("http://localhost:8080/api/rental" + "/new", rentalRequest, Object.class);
+        ResponseEntity<?> response = restTemplate.postForEntity(getBaseUrl() + "/new", rentalRequest, Object.class);
 
+        System.out.println(response);
         /**
          * checking if the status is CREATED
          */
@@ -154,7 +166,7 @@ public class RentalControllerTest {
      * Testing retrieving a rental with id, api "api/rental/{id}"
      */
     @Test
-    public void testGetRentalByIdWithAValidBookId() {
+    public void testGetRentalById() {
         /**
          * Assuming rental with this ID exists in the database
          */
@@ -247,33 +259,5 @@ public class RentalControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
-    /**
-     * A static method to generate valid Isbn13 number for testing purpose
-     *
-     * @return isbn13 number as string
-     */
-    public static String generateRandomIsbn13() {
-        StringBuilder isbn = new StringBuilder("978");
-        Random random = new Random();
 
-        /**
-         * Generate and append 9 characters
-         */
-        for (int i = 0; i < 9; i++) {
-            isbn.append(random.nextInt(10));
-        }
-
-        /**
-         * Calculate the check digit
-         */
-        int sum = 0;
-        for (int i = 0; i < 12; i++) {
-            int digit = Character.getNumericValue(isbn.charAt(i));
-            sum += (i % 2 == 0) ? digit : digit * 3;
-        }
-        int checkDigit = (10 - (sum % 10)) % 10;
-        isbn.append(checkDigit);
-
-        return isbn.toString();
-    }
 }

@@ -5,8 +5,11 @@ spring:
 #  JPA properties
   jpa:
     hibernate:
-      ddl-auto: update
+#  It's set to create-drop for testing db seeding
+      ddl-auto: create-drop
+    show-sql: true
 
-#  active profile setting
+  #  active profile setting
   profiles:
     active: dev
+

@@ -5,6 +5,7 @@ import com.midlaj.olikassigment.model.Author;
 import com.midlaj.olikassigment.model.Book;
 import com.midlaj.olikassigment.repository.AuthorRepository;
 import com.midlaj.olikassigment.repository.BookRepository;
+import com.midlaj.olikassigment.util.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,14 +74,13 @@ public class BookControllerTest {
         authorId = savedAuthor.getId();
 
 
-
         /**
          *  Create book test data
          */
         Book book = Book.builder()
                 .title("Test_Book_Title_1" + UUID.randomUUID())
                 .author(savedAuthor)
-                .isbn(generateRandomIsbn13())
+                .isbn(Utils.generateRandomIsbn13())
                 .publicationYear(LocalDate.now().getYear())
                 .available(true)
                 .build();
@@ -109,7 +108,7 @@ public class BookControllerTest {
         /**
          * creating a random but valid book request object
          */
-        BookRequest bookRequest = new BookRequest("test_book_" + UUID.randomUUID(), authorId, generateRandomIsbn13(), 2020);
+        BookRequest bookRequest = new BookRequest("test_book_" + UUID.randomUUID(), authorId, Utils.generateRandomIsbn13(), 2020);
 
         /**
          * performing a POST request
@@ -120,7 +119,7 @@ public class BookControllerTest {
         /**
          * checking if the status is CREATED
          */
-         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
     /**
@@ -189,38 +188,54 @@ public class BookControllerTest {
          */
         ResponseEntity<Book> response = restTemplate.getForEntity(getBaseUrl() + "/" + bookId, Book.class);
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-
     }
 
 
     /**
-     * A static method to generate valid Isbn13 number for testing purpose
-     *
-     * @return isbn13 number as string
+     * Testing getting all books that available for renting out, api "api/book/available"
      */
-    public static String generateRandomIsbn13() {
-        StringBuilder isbn = new StringBuilder("978");
-        Random random = new Random();
+    @Test
+    public void testGetBooksAvailableForRent() {
 
         /**
-         * Generate and append 9 characters
+         * performing GET request
          */
-        for (int i = 0; i < 9; i++) {
-            isbn.append(random.nextInt(10));
-        }
+        ResponseEntity<List<Book>> response = restTemplate.exchange(
+                getBaseUrl() + "/available",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                }
+        );
 
         /**
-         * Calculate the check digit
+         * checking if status is OK
          */
-        int sum = 0;
-        for (int i = 0; i < 12; i++) {
-            int digit = Character.getNumericValue(isbn.charAt(i));
-            sum += (i % 2 == 0) ? digit : digit * 3;
-        }
-        int checkDigit = (10 - (sum % 10)) % 10;
-        isbn.append(checkDigit);
-
-        return isbn.toString();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
+    /**
+     * Testing getting all books that already rented out, api "api/book/rented"
+     */
+    @Test
+    public void testGetBooksAlreadyRented() {
+
+        /**
+         * performing GET request
+         */
+        ResponseEntity<List<Book>> response = restTemplate.exchange(
+                getBaseUrl() + "/rented",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                }
+        );
+
+        /**
+         * checking if status is OK
+         */
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
 
 }
