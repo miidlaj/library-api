@@ -45,16 +45,10 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 ## Running the tests
 
-### Unit  testing
+### Unit tests & Integration tests
 
 ```shell
 mvn test
-```
-
-### Integration test
-
-```shell
-mvn verify -Pintegration-test
 ```
 
 ## Documentation
