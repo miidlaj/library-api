@@ -1,0 +1,7 @@
+spring:
+  #  Database properties
+  datasource:
+    url: jdbc:postgresql://olik-assignment-6647.6xw.aws-ap-southeast-1.cockroachlabs.cloud:26257/olik?sslmode=verify-full
+    username: midlaj
+    password: UoWQnpeWyRfBNZ3fm5yDdw
+    driver-class-name: org.postgresql.Driver

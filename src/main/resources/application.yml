@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: Olik-Assigment
+
+#  JPA properties
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+#  active profile setting
+  profiles:
+    active: dev
+
