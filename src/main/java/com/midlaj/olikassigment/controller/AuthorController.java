@@ -43,7 +43,7 @@ public class AuthorController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getAuthorById(@PathVariable Long id) {
         Author createdAuthor = authorService.getAuthorById(id);
-        return new ResponseEntity<>(createdAuthor, HttpStatus.CREATED);
+        return new ResponseEntity<>(createdAuthor, HttpStatus.OK);
     }
 
 

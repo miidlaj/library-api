@@ -1,7 +1,10 @@
 package com.midlaj.olikassigment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,4 +25,11 @@ public class Author {
 
     @Column(name = "author_biography", nullable = false, length = 1024)
     private String biography;
+
+    /**
+     * Define the one-to-many relationship with cascade deletion
+     */
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Book> books;
 }

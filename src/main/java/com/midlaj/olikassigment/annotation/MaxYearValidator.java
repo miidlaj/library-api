@@ -12,6 +12,12 @@ public class MaxYearValidator implements ConstraintValidator<MaxYear, Integer> {
     public void initialize(MaxYear constraintAnnotation) {
     }
 
+    /**
+     * Checking give value with current year
+     * @param year
+     * @param context
+     * @return boolean
+     */
     @Override
     public boolean isValid(Integer year, ConstraintValidatorContext context) {
         if (year == null) {

@@ -50,6 +50,7 @@ public class RentalController {
         return new ResponseEntity<>(rental, HttpStatus.OK);
     }
 
+
     /**
      * for returning a rental
      * @return updated rental object
