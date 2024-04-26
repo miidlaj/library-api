@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * For inserting some values into database
+ */
 @Component
 public class DatabaseSeeder {
 
