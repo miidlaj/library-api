@@ -52,7 +52,7 @@ public class ControllerAdvisor {
          */
         log.warn(ex.getMessage());
 
-        return new ErrorResponse("NOT_FOUND", ex.getMessage());
+        return new ErrorResponse("ENTITY_NOT_FOUND", ex.getMessage());
     }
 
     /**

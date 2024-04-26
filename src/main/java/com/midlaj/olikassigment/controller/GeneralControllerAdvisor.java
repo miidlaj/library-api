@@ -6,7 +6,6 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -23,15 +22,18 @@ public class GeneralControllerAdvisor {
         log.error(ex.getMessage());
 
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String error_name = "SERVER_ERROR";
 
         if (ex instanceof BadRequestException) {
             status = HttpStatus.BAD_REQUEST;
+            error_name = "BAD_REQUEST";
         } else if (ex instanceof ChangeSetPersister.NotFoundException){
+            error_name = "NOT_FOUND";
             status = HttpStatus.NOT_FOUND;
         }
 
         String errorMessage = "An unexpected error occurred.";
-        ErrorResponse errorResponse = new ErrorResponse("SERVER_ERROR", errorMessage);
+        ErrorResponse errorResponse = new ErrorResponse(error_name, errorMessage);
 
         return new ResponseEntity<>(errorResponse, status);
     }

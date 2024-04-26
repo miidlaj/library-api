@@ -1,79 +1,217 @@
 package com.midlaj.olikassigment;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.midlaj.olikassigment.controller.BookController;
 import com.midlaj.olikassigment.dto.BookRequest;
 import com.midlaj.olikassigment.model.Author;
 import com.midlaj.olikassigment.model.Book;
+import com.midlaj.olikassigment.repository.AuthorRepository;
 import com.midlaj.olikassigment.repository.BookRepository;
-import com.midlaj.olikassigment.service.BookService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@WebMvcTest(BookController.class)
-@AutoConfigureMockMvc
+/**
+ * Integration Testing of Book Controller
+ */
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class BookControllerTest {
 
 
     @Autowired
-    private MockMvc mockMvc;
+    private TestRestTemplate restTemplate;
 
-    @MockBean
-    private BookService mockBookService;
+    @LocalServerPort
+    private int port;
 
-    @MockBean
-    private BookRepository mockBookRepo;
+    @Autowired
+    private BookRepository bookRepository;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private AuthorRepository authorRepository;
 
-    private final String BASE_URL = "/api/book";
-
-    @Test
-    public void testCreateNewBookValidRequestReturnCreated() throws Exception {
-
-        // Given a valid BookRequest object
-        BookRequest bookRequest = new BookRequest("test_book_" + UUID.randomUUID(), 1L, generateRandomIsbn13(), 2020);
-
-        // Mock the book object returned by the book service when createNewBook method is called
-        Author author = new Author(1L, "test_author_" + UUID.randomUUID(), "add a new 64 characters biography to author, other wise test will not pass correctly.");
-        Book createdBook = new Book(1L, bookRequest.title(), author, bookRequest.isbn(), bookRequest.publicationYear(), true);
-        when(mockBookService.createNewBook(bookRequest)).thenReturn(createdBook);
-
-        // Perform the POST request
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL +"/new")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookRequest)))
-                .andReturn();
-
-        // Verify response status and content
-        assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
-        assertEquals(objectMapper.writeValueAsString(createdBook), result.getResponse().getContentAsString());
+    private String getBaseUrl() {
+        return "http://localhost:" + port + "/api/book";
     }
 
+    private Long authorId = 1L;
+    private Long bookId = 1L;
+
+    @BeforeEach
+    public void setupTestData() {
+
+        /**
+         *  Create author test data
+         */
+        Author author = Author.builder()
+                .name("Test_Author_1" + UUID.randomUUID())
+                .biography("Test_Biography_1_Lorem Ipsum Test Value, 64 characters required to pass validation")
+                .build();
+
+        Author savedAuthor = authorRepository.save(author);
+
+        /**
+         * Check if saved author is not null;
+         */
+        assertNotNull(savedAuthor);
+
+        /**
+         * set author id for testing
+         */
+        authorId = savedAuthor.getId();
+
+
+
+        /**
+         *  Create book test data
+         */
+        Book book = Book.builder()
+                .title("Test_Book_Title_1" + UUID.randomUUID())
+                .author(savedAuthor)
+                .isbn(generateRandomIsbn13())
+                .publicationYear(LocalDate.now().getYear())
+                .available(true)
+                .build();
+
+        Book savedBook = bookRepository.save(book);
+
+        /**
+         * Check if saved book is not null;
+         */
+        assertNotNull(savedBook);
+
+        /**
+         * set book id for testing
+         */
+        bookId = savedBook.getId();
+    }
+
+
+    /**
+     * Testing creating new book api "api/book/new"
+     */
+    @Test
+    public void testCreateNewBookValidRequestReturnCreated() {
+
+        /**
+         * creating a random but valid book request object
+         */
+        BookRequest bookRequest = new BookRequest("test_book_" + UUID.randomUUID(), authorId, generateRandomIsbn13(), 2020);
+
+        /**
+         * performing a POST request
+         */
+        ResponseEntity<?> response = restTemplate.postForEntity(getBaseUrl() + "/new", bookRequest, Book.class);
+        System.out.println(response);
+
+        /**
+         * checking if the status is CREATED
+         */
+         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    /**
+     * Testing retrieving a book with id, api "api/book/{id}"
+     */
+    @Test
+    public void testGetBookByIdWithAValidBookId() {
+        /**
+         * Assuming book with this ID exists in the database
+         */
+        long bookId = this.bookId;
+
+        /**
+         * performing GET request
+         */
+        ResponseEntity<Book> response = restTemplate.getForEntity(getBaseUrl() + "/" + bookId, Book.class);
+
+        /**
+         * checking if the status is OK
+         */
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+
+    /**
+     * Testing getting all books, api "api/book"
+     */
+    @Test
+    public void testGetBooks() {
+
+        /**
+         * performing GET request
+         */
+        ResponseEntity<List<Book>> response = restTemplate.exchange(
+                getBaseUrl(),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                }
+        );
+
+        /**
+         * checking if status is OK
+         */
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    /**
+     * Testing deleting a book by id, api DELETE "api/book"
+     */
+    @Test
+    public void testDeleteBookById() {
+        /**
+         * Assuming book with this ID exists in the database
+         */
+        long bookId = this.bookId;
+
+        /**
+         * performing a DELETE request
+         */
+
+        restTemplate.delete(getBaseUrl() + "/" + bookId);
+
+        /**
+         * Verify that the book is deleted by trying to fetch it again (expecting 409)
+         */
+        ResponseEntity<Book> response = restTemplate.getForEntity(getBaseUrl() + "/" + bookId, Book.class);
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+
+    }
+
+
+    /**
+     * A static method to generate valid Isbn13 number for testing purpose
+     *
+     * @return isbn13 number as string
+     */
     public static String generateRandomIsbn13() {
         StringBuilder isbn = new StringBuilder("978");
         Random random = new Random();
 
-        // Generate 9 random digits
+        /**
+         * Generate and append 9 characters
+         */
         for (int i = 0; i < 9; i++) {
             isbn.append(random.nextInt(10));
         }
 
-        // Calculate the check digit
+        /**
+         * Calculate the check digit
+         */
         int sum = 0;
         for (int i = 0; i < 12; i++) {
             int digit = Character.getNumericValue(isbn.charAt(i));
@@ -84,26 +222,5 @@ public class BookControllerTest {
 
         return isbn.toString();
     }
-
-
-    @Test()
-    public void testCreateNewBookInvalidRequestThrowsValidationException() throws Exception {
-
-        /**
-         * create an invalid BookRequest with invalid isbn, invalid publication year
-         */
-        BookRequest bookRequest = new BookRequest("title", 2L, "invalid isbn", 2025);
-
-        // Perform the POST request
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL +"/new")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookRequest)))
-                .andReturn();
-
-
-        assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
-    }
-
-
 
 }

@@ -46,7 +46,7 @@ public class BookController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getBookById(@PathVariable Long id) {
         Book createdBook = bookService.getBookById(id);
-        return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
+        return new ResponseEntity<>(createdBook, HttpStatus.OK);
     }
 
 
@@ -71,21 +71,31 @@ public class BookController {
     }
 
 
-    // Endpoint to retrieve books by author
+    /**
+     * Endpoint to retrieve books by author
+     * @param authorId
+     * @return list of book
+     */
     @GetMapping("/author/{authorId}")
     public ResponseEntity<?> getBooksByAuthor(@PathVariable Long authorId) {
         List<Book> books = bookService.findBooksByAuthor(authorId);
         return ResponseEntity.ok(books);
     }
 
-    // Endpoint to retrieve books available for rent
+    /**
+     *  Endpoint to retrieve books available for rent
+     * @return list of book
+     */
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableBooksForRent() {
         List<Book> availableBooks = bookService.findAvailableBooksForRent();
         return ResponseEntity.ok(availableBooks);
     }
 
-    // Endpoint to retrieve books currently rented
+    /**
+     * Endpoint to retrieve books currently rented
+     * @return list of book
+     */
     @GetMapping("/rented")
     public ResponseEntity<?> getRentedBooks() {
         List<Book> rentedBooks = bookService.findRentedBooks();
