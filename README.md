@@ -73,6 +73,7 @@ mvn test
 * Used validation for every request.
 * Created a custom validation annotation [@MaxYear](/src/main/java/com/midlaj/olikassigment/annotation/MaxYear.java) to validate publish year of a book since we can't allow a year value that is more than the current year.
 * Created [OpenAPI Swagger 3 Documentation](/src/main/java/com/midlaj/olikassigment/config/SwaggerConfig.java) for in-app docs.
+* Creates [Tests](/src/test/java/com/midlaj/olikassigment) for controllers and services
 * Integration Testing for every route.
 * Unit testing for business logics.
 * Created Custom [Exceptions](/src/main/java/com/midlaj/olikassigment/exception/EntityNotFoundException.java) for managing errors and validation.

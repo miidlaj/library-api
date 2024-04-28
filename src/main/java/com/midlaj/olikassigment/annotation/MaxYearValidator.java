@@ -13,7 +13,7 @@ public class MaxYearValidator implements ConstraintValidator<MaxYear, Integer> {
     }
 
     /**
-     * Checking give value with current year
+     * Checking given value with current year
      * @param year
      * @param context
      * @return boolean

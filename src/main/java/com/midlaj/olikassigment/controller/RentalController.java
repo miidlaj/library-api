@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Rental Controller where all the crud operations of rentals mapped
+ */
 @RestController
 @RequestMapping("/api/rental")
 public class RentalController {

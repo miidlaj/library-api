@@ -32,8 +32,10 @@ public class BookServiceImpl implements BookService {
          */
         bookRepository.findBookByTitle(bookRequest.title())
                 .ifPresentOrElse((s) -> {
+                    System.out.println(s);
                     throw new DuplicateEntityException("Book with title '" + bookRequest.title() + "' already exists.");
                 }, () -> {
+                    System.out.println("here");
                 });
 
         /**
@@ -45,12 +47,12 @@ public class BookServiceImpl implements BookService {
                 }, () -> {
                 });
 
-
         /**
          * Checks for if author id is a valid author in db. If not present it will throw a not found exception
          */
-        if (!authorService.checkAuthorById(bookRequest.authorId()))
+        if (!authorService.checkAuthorById(bookRequest.authorId())){
             throw new EntityNotFoundException("Author not found");
+        }
 
 
         /**
@@ -112,11 +114,21 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
+    /**
+     * saving book entity
+     * @param book
+     * @return book
+     */
     @Override
     public Book saveBook(Book book) {
         return bookRepository.save(book);
     }
 
+    /**
+     * to find books by author
+     * @param authorId
+     * @return list of book
+     */
     @Override
     public List<Book> findBooksByAuthor(Long authorId) {
 
@@ -127,11 +139,19 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findBooksByAuthorId(authorId);
     }
 
+    /**
+     * to find books that are available for renting out
+     * @return list of book
+     */
     @Override
     public List<Book> findAvailableBooksForRent() {
         return bookRepository.findBooksByAvailableTrue();
     }
 
+    /**
+     * to find already rented books
+     * @return list of book
+     */
     @Override
     public List<Book> findRentedBooks() {
         return bookRepository.findBooksByAvailableFalse();

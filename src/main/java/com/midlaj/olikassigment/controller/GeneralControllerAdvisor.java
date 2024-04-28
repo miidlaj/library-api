@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+/**
+ * General Controller advisor for handling and unhandled exceptions
+ */
 @RestControllerAdvice
 @Slf4j
 public class GeneralControllerAdvisor {
